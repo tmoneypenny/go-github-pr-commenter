@@ -21,8 +21,22 @@ type Commenter struct {
 var patchRegex *regexp.Regexp
 var commitRefRegex *regexp.Regexp
 
+type ConnectorInput struct {
+	*EnterpriseConnectorInput        // Optional
+	Token                     string // Required
+	Repo                      string // Required
+	Owner                     string // Required
+	PRNumber                  int    // Required
+}
+
+type EnterpriseConnectorInput struct {
+	BaseURL   string
+	UploadURL string
+}
+
 // NewCommenter creates a Commenter for updating PR with comments
-func NewCommenter(token, owner, repo string, prNumber int) (*Commenter, error) {
+func NewCommenter(input ConnectorInput) (*Commenter, error) {
+	var ghConnector *connector
 	regex, err := regexp.Compile(`^@@.*\+(\d+),(\d+).+?@@`)
 	if err != nil {
 		return nil, err
@@ -35,18 +49,22 @@ func NewCommenter(token, owner, repo string, prNumber int) (*Commenter, error) {
 	}
 	commitRefRegex = regex
 
-	if len(token) == 0 {
+	if len(input.Token) == 0 {
 		return nil, errors.New("the GITHUB_TOKEN has not been set")
 	}
 
-	connector := createConnector(token, owner, repo, prNumber)
+	ghConnector, err = createConnector(input)
+	if err != nil {
+		fmt.Println("could not create a new GH connector")
+		return nil, err
+	}
 
-	if !connector.prExists() {
-		return nil, newPrDoesNotExistError(connector)
+	if !ghConnector.prExists() {
+		return nil, newPrDoesNotExistError(ghConnector)
 	}
 
 	c := &Commenter{
-		pr: connector,
+		pr: ghConnector,
 	}
 	return c, nil
 }

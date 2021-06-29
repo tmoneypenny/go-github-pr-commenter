@@ -2,6 +2,7 @@ package commenter
 
 import (
 	"context"
+	"log"
 	"time"
 
 	"github.com/google/go-github/v32/github"
@@ -22,20 +23,34 @@ type existingComment struct {
 	commentId *int64
 }
 
-func createConnector(token, owner, repo string, prNumber int) *connector {
+func createConnector(input ConnectorInput) (*connector, error) {
+	var client *github.Client
+	var err error
 	ctx := context.Background()
-	ts := oauth2.StaticTokenSource(&oauth2.Token{AccessToken: token})
+	ts := oauth2.StaticTokenSource(&oauth2.Token{AccessToken: input.Token})
 	tc := oauth2.NewClient(ctx, ts)
 
-	client := github.NewClient(tc)
+	if input.EnterpriseConnectorInput != nil {
+		client, err = github.NewEnterpriseClient(
+			input.EnterpriseConnectorInput.BaseURL,
+			input.EnterpriseConnectorInput.UploadURL,
+			tc,
+		)
+		if err != nil {
+			log.Println("could not establish a GHE connection")
+			return nil, err
+		}
+	} else {
+		client = github.NewClient(tc)
+	}
 
 	return &connector{
 		prs:      client.PullRequests,
 		comments: client.Issues,
-		owner:    owner,
-		repo:     repo,
-		prNumber: prNumber,
-	}
+		owner:    input.Owner,
+		repo:     input.Repo,
+		prNumber: input.PRNumber,
+	}, nil
 }
 
 func (c *connector) writeReviewComment(block *github.PullRequestComment, commentId *int64, isRetry ...bool) error {

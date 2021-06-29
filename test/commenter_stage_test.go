@@ -48,7 +48,12 @@ func (ct *commenterTest) usingTokenFromEnvironment() *commenterTest {
 }
 
 func (ct *commenterTest) aNewCommenterIsCreated() *commenterTest {
-	c, err := commenter.NewCommenter(ct.token, ct.owner, ct.repo, ct.prNo)
+	c, err := commenter.NewCommenter(commenter.ConnectorInput{
+		Token:    ct.token,
+		Owner:    ct.owner,
+		Repo:     ct.repo,
+		PRNumber: ct.prNo,
+	})
 	if err != nil {
 		ct.err = err
 	}
