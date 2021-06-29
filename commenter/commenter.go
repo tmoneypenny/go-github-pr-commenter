@@ -22,11 +22,11 @@ var patchRegex *regexp.Regexp
 var commitRefRegex *regexp.Regexp
 
 type ConnectorInput struct {
-	*EnterpriseConnectorInput        // Optional
-	Token                     string // Required
-	Repo                      string // Required
-	Owner                     string // Required
-	PRNumber                  int    // Required
+	Enterprise *EnterpriseConnectorInput // Optional
+	Token      string                    // Required
+	Repo       string                    // Required
+	Owner      string                    // Required
+	PRNumber   int                       // Required
 }
 
 type EnterpriseConnectorInput struct {
