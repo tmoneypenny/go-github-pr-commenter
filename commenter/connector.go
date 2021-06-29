@@ -30,10 +30,10 @@ func createConnector(input ConnectorInput) (*connector, error) {
 	ts := oauth2.StaticTokenSource(&oauth2.Token{AccessToken: input.Token})
 	tc := oauth2.NewClient(ctx, ts)
 
-	if input.EnterpriseConnectorInput != nil {
+	if input.Enterprise != nil {
 		client, err = github.NewEnterpriseClient(
-			input.EnterpriseConnectorInput.BaseURL,
-			input.EnterpriseConnectorInput.UploadURL,
+			input.Enterprise.BaseURL,
+			input.Enterprise.UploadURL,
 			tc,
 		)
 		if err != nil {
