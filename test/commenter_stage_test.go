@@ -5,8 +5,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/owenrumney/go-github-pr-commenter/commenter"
 	"github.com/stretchr/testify/assert"
+	"github.com/tmoneypenny/go-github-pr-commenter/commenter"
 )
 
 type commenterTest struct {
